@@ -112,6 +112,52 @@ static struct list_t *list_new(struct statck_t *s,struct list_t *head)
 
 static void list_reverse_print(struct list_t *l)
 {
+	if(l == NULL)
+		return;
+	list_reverse_print(l->next);
+	struct statck_t *s = l->instr;
+	switch(s->kind){
+		case STACK_ADD:{
+			printf("add\n");
+			break;
+		}
+		case STACK_PUSH:{
+			struct statck_push *push = (struct statck_push *)s;
+			printf("push %d\n",push->i);
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+static struct list_t *All = NULL;
+
+static void emit(struct statck_t *s)
+{
+	All = list_new(s,All);
+}
+
+static void compile(struct exp_t *exp)
+{
+	switch(exp->kind){
+		case EXP_INT:{
+			struct exp_int *p = (struct exp_int *)exp;
+			struct statck_t *push = statck_push_new(p->i);
+			emit(push);
+			break;
+		}
+		case EXP_SUM:{
+			struct exp_sum *p = (struct exp_sum *)exp;
+			compile(p->left);
+			compile(p->right);
+			struct statck_t *add = statck_add_new();
+			emit(add);
+			break;
+		}
+		default:
+			break;
+	}
 }
 
 int main()
@@ -122,4 +168,6 @@ int main()
 
 	exp_print(exp);
 	printf("\n");
+	compile(exp);
+	list_reverse_print(All);
 }
