@@ -2,7 +2,8 @@
 
 # BNF
 
-	expr->term+term|term-term|term
-	term->factor*factor|factor/factor|factor
-	factor->number|(expr)
-
+	<exp> -> <term> { <addop> <term> }
+	<addop> -> + | -
+	<term> -> <factor> { <mulop> <factor> }
+	<mulop> -> * | /
+	<factor> -> ( <exp> ) | Number
